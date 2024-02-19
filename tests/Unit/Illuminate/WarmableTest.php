@@ -4,6 +4,8 @@ namespace Henzeb\Warmable\Tests\Unit\Illuminate;
 
 
 use Event;
+use Henzeb\DateTime\DateTime;
+use Henzeb\Warmable\Illuminate\CacheItem;
 use Henzeb\Warmable\Illuminate\Support\Events\CacheFailedWarmingUp;
 use Henzeb\Warmable\Illuminate\Support\Events\CachePreheating;
 use Henzeb\Warmable\Illuminate\Support\Events\CacheWarmedUp;
@@ -309,6 +311,22 @@ class WarmableTest extends TestCase
             HeavyRequestLaravel::class . '.warmable.' . HeavyRequestLaravel::class . '.5a658a8ee0d8e388b8dc1be8e72c61a105e76a99',
             HeavyRequestLaravel::with('test')->uniqueId()
         );
+    }
+
+    public function testShouldUseIlluminateCacheItem(): void
+    {
+        DateTime::setTestNow('2024-01-01 00:00:00');
+        HeavyRequestLaravel::withKey('test')
+            ->withTtl(10)
+            ->withGracePeriod(10)
+            ->warmup();
+
+        $cacheItem = Cache::get('test');
+
+        $this->assertInstanceOf(CacheItem::class, $cacheItem);
+
+        $this->assertEquals(1704067210, $cacheItem->ttl);
+        $this->assertEquals('Hello World', $cacheItem->data);
     }
 
     public function testafterShutdown(): void

@@ -104,6 +104,11 @@ abstract class Warmable extends BaseWarmable implements ShouldQueue, ShouldBeUni
         return $this->isPreheated();
     }
 
+    protected function wrapInCacheItem(int $ttl, mixed $data): CacheItem
+    {
+        return new CacheItem($ttl, $data);
+    }
+
     protected function getPreheated(bool $hasDefault): mixed
     {
         if (
